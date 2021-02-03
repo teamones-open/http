@@ -1,0 +1,22 @@
+{
+    "name": "teamones/http",
+    "description": "Teamones框架http客户端",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Weijer Cheng",
+            "email": "weiwei163@foxmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.2.0",
+        "yurunsoft/yurun-http": "~3.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "teamones\\http\\": "src/"
+        }
+    },
+    "bin": ["bin/php_etcd_client"]
+}
