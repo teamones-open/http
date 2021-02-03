@@ -59,6 +59,18 @@ class Client extends Base
     }
 
     /**
+     * 设置host参数
+     * @param $body
+     * @return $this
+     */
+    public function setHost($host)
+    {
+        $this->_host = $host;
+
+        return $this;
+    }
+
+    /**
      * 设置body参数
      * @param $body
      * @return $this
