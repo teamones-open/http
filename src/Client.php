@@ -83,20 +83,20 @@ class Client extends Base
     }
 
     /**
-     * 组装请求, 总超时30s，连接超时500ms
-     * @return array|\Yurun\Util\YurunHttp\Http\Response
+     * 同步http请求
+     * @return array|mixed
      */
-    public function request()
+    protected function syncHttp()
     {
         $url = $this->generateUrl();
         switch ($this->_method) {
             case 'POST':
-                $response = self::instance()->timeout(30000, 500)
+                $response = self::instance('sync')->timeout(30000, 500)
                     ->headers($this->_headers)
                     ->post($url, $this->_body, 'json');
                 break;
             case 'GET':
-                $response = self::instance()->timeout(30000, 500)
+                $response = self::instance('sync')->timeout(30000, 500)
                     ->headers($this->_headers)
                     ->get($url, $this->_body);
                 break;
@@ -118,6 +118,54 @@ class Client extends Base
             }
         } else {
             return $response;
+        }
+    }
+
+    /**
+     * 异步http请求
+     * @return array
+     */
+    protected function asynchHttp()
+    {
+        $url = $this->generateUrl();
+
+        if (in_array($this->_method, ['POST', 'GET'])) {
+            self::instance($this->_method)->request(
+                $url,
+                [
+                    'method' => 'POST',
+                    'version' => '1.1',
+                    'headers' => $this->_headers,
+                    'data' => $this->_body,
+                    'success' => function ($response) {
+                        echo $response->getBody();
+                    },
+                    'error' => function ($exception) {
+                        echo $exception;
+                    }
+                ]
+            );
+        } else {
+            return [];
+        }
+    }
+
+    /**
+     * 组装请求, 总超时30s，连接超时500ms
+     * @param string $type
+     * @return array|mixed
+     */
+    public function request($type = 'sync')
+    {
+        switch ($type) {
+            case 'asynch':
+                // 发起异步http请求
+                return $this->asynchHttp();
+                break;
+            default:
+                // 发起同步步http请求
+                return $this->syncHttp();
+                break;
         }
     }
 }

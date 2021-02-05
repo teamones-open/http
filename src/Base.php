@@ -3,13 +3,14 @@
 namespace teamones\http;
 
 use Yurun\Util\HttpRequest;
+use Workerman\Http\Client;
 
 class Base
 {
     /**
-     * @var \Yurun\Util\HttpRequest
+     * @var array
      */
-    protected static $_instance = null;
+    protected static $_instance = [];
 
     // 服务地址
     protected $_host = '';
@@ -27,14 +28,19 @@ class Base
     protected $_body = null;
 
     /**
-     * @return HttpRequest
+     * @param string $type
+     * @return \Yurun\Util\HttpRequest | \Workerman\Http\Client
      */
-    public static function instance()
+    public static function instance($type = 'sync')
     {
-        if (empty(self::$_instance)) {
-            self::$_instance = new HttpRequest;
+        if (empty(self::$_instance[$type])) {
+            if($type === 'sync'){
+                self::$_instance[$type] = new HttpRequest;
+            }else{
+                self::$_instance[$type] = new Client;
+            }
         }
-        return self::$_instance;
+        return self::$_instance[$type];
     }
 
     /**
@@ -44,6 +50,6 @@ class Base
      */
     public static function __callStatic($name, $arguments)
     {
-        return static::instance()->{$name}(... $arguments);
+        return static::instance('sync')->{$name}(... $arguments);
     }
 }
