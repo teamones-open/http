@@ -128,25 +128,36 @@ class Client extends Base
     protected function asynchHttp()
     {
         $url = $this->generateUrl();
-
-        if (in_array($this->_method, ['POST', 'GET'])) {
-            self::instance($this->_method)->request(
-                $url,
-                [
-                    'method' => 'POST',
-                    'version' => '1.1',
-                    'headers' => $this->_headers,
-                    'data' => $this->_body,
-                    'success' => function ($response) {
-                        echo $response->getBody();
+        switch ($this->_method) {
+            case 'POST':
+                self::instance('asynch')->request(
+                    $url,
+                    [
+                        'method' => 'POST',
+                        'version' => '1.1',
+                        'headers' => $this->_headers,
+                        'data' => json_encode($this->_body),
+                        'success' => function ($response) {
+                            return $response->getBody();
+                        },
+                        'error' => function ($exception) {
+                            throw new \RuntimeException($exception, -4000000);
+                        }
+                    ]
+                );
+                break;
+            case 'GET':
+                self::instance('asynch')->get(
+                    $url,
+                    function ($response) {
+                        return $response->getBody();
                     },
-                    'error' => function ($exception) {
-                        echo $exception;
-                    }
-                ]
-            );
-        } else {
-            return [];
+                    function ($exception) {
+                        throw new \RuntimeException($exception, -4000000);
+                    });
+                break;
+            default:
+                return [];
         }
     }
 
