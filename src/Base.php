@@ -3,12 +3,17 @@
 namespace teamones\http;
 
 use Yurun\Util\HttpRequest;
-use Workerman\Http\Client;
 
+/**
+ * 请求基类：保存一次调用的 host/route/method/headers/body。
+ *
+ * 3.0 起 YurunHttp 源码内置在 third_party/yurun-http（MIT，见其 LICENSE），
+ * 不再依赖 workerman/http-client，异步分支已移除。
+ */
 class Base
 {
     /**
-     * @var array
+     * @var array<string, HttpRequest>
      */
     protected static $_instance = [];
 
@@ -28,24 +33,25 @@ class Base
     protected $_body = null;
 
     /**
-     * @param string $type
-     * @return \Yurun\Util\HttpRequest | \Workerman\Http\Client
+     * 获取底层请求实例（同步）。
+     *
+     * @param string $type 仅为兼容旧签名，异步已移除，一律返回同步实例
+     * @return HttpRequest
      */
     public static function instance($type = 'sync')
     {
-        if (empty(self::$_instance[$type])) {
-            if($type === 'sync'){
-                self::$_instance[$type] = new HttpRequest;
-            }else{
-                self::$_instance[$type] = new Client;
-            }
+        if (empty(self::$_instance['sync'])) {
+            self::$_instance['sync'] = new HttpRequest();
         }
-        return self::$_instance[$type];
+
+        return self::$_instance['sync'];
     }
 
     /**
-     * @param $name
-     * @param $arguments
+     * 静态转发到同步请求实例。
+     *
+     * @param string $name
+     * @param array  $arguments
      * @return mixed
      */
     public static function __callStatic($name, $arguments)
